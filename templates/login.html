@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}DockiApp - Iniciar Sesión{% endblock %}
+
+{% block header_title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('auth.login') }}" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+    <div class="content-section" style="align-items: center; text-align: center; margin-top: 10px;">
+
+        <div style="font-size: 38px; margin-bottom: 4px;">
+            🔐
+        </div>
+
+        <div style="font-size: 16px; font-weight: bold; color: #002D5A; margin-bottom: 14px;">
+            Acceso Seguro a DockiApp
+        </div>
+
+        {% if error %}
+        <div style="background-color: #ffebee; border: 1px solid #E53935; color: #b71c1c; padding: 10px 14px; border-radius: 14px; font-size: 13px; margin-bottom: 14px; width: 100%;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="field-group" style="width: 100%;">
+            <label class="field-label">Usuario:</label>
+            <input type="text" name="username" class="input-pill" placeholder="Ingrese su usuario..." required autofocus style="text-align: center;">
+        </div>
+
+        <div class="field-group" style="width: 100%;">
+            <label class="field-label">Contraseña:</label>
+            <input type="password" name="password" class="input-pill" placeholder="••••••••" required style="text-align: center;">
+        </div>
+
+        <div style="background-color: #f7fcfe; border: 1px solid #CAEEFB; border-radius: 12px; padding: 10px; font-size: 11px; color: #595959; text-align: left; width: 100%; margin-top: 6px;">
+            <strong>Credenciales Iniciales de Prueba:</strong><br>
+            • Admin: <code>admin</code> / <code>admin123</code><br>
+            • Operador: <code>operador</code> / <code>operador123</code>
+        </div>
+    </div>
+
+    <!-- Botón de Acción -->
+    <div style="margin-top: 18px;">
+        <div class="action-buttons-row">
+            <button type="submit" class="btn-primary" style="padding: 12px 48px; width: 80%;">
+                Ingresar
+            </button>
+        </div>
+
+        <div class="device-footer" style="justify-content: center; margin-top: 16px;">
+            <div class="version-label">
+                Sistema de Seguridad DockiApp v2.0
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

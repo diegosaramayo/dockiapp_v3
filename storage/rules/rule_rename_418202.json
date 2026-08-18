@@ -1,0 +1,14 @@
+{
+  "id": "rule_rename_418202",
+  "code": "RL-REN-6215",
+  "name": "Regla Renombrar Campo (Nombre Completo)",
+  "type": "rename_label",
+  "target_keywords": [
+    "Nombre Completo",
+    "Nombre y apellido",
+    "Nombre y apellido del Titular"
+  ],
+  "new_label": "Nombre Completo",
+  "action": "rename_label",
+  "message": "Título de campo renombrado automáticamente a 'Nombre Completo'."
+}

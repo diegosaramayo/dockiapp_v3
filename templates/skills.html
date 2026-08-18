@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}DockiApp - Módulo de Skills{% endblock %}
+
+{% block header_title %}DockiApp{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="form-list-title">Módulo de <em>Skills (Habilidades):</em></div>
+
+    <!-- Carga masiva de Skills vía XLSX / Excel o CSV -->
+    <form method="POST" action="{{ url_for('skills.upload_excel') }}" enctype="multipart/form-data" style="background: #e3f7ff; padding: 10px; border-radius: 14px; border: 1px dashed #002D5A; margin-bottom: 8px;">
+        <div style="font-size: 13px; font-weight: bold; color: #002D5A; margin-bottom: 6px;">Importar Skills desde XLSX / CSV:</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="file" name="excel_file" accept=".xlsx,.xls,.csv" required style="font-size: 11px; flex: 1;">
+            <button type="submit" class="btn-primary" style="padding: 6px 14px; font-size: 12px;">Subir Archivo</button>
+        </div>
+    </form>
+
+    <!-- Lista de Skills -->
+    <div style="max-height: 250px; overflow-y: auto;">
+        {% for skill in skills %}
+        <div class="item-card">
+            <div class="item-card-header">
+                <div class="item-card-title">{{ skill.name }}</div>
+                <span class="item-card-code">{{ skill.code }}</span>
+            </div>
+            <div class="item-card-desc">{{ skill.description }}</div>
+            <div style="font-size: 11px; color: #002D5A; font-style: italic;">Categoría: {{ skill.category }}</div>
+
+            {% if skill.image_url %}
+                <img src="{{ skill.image_url }}" class="item-thumbnail" alt="Imagen Skill" style="margin-top: 4px;">
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('skills.delete_skill', skill_id=skill.id) }}" style="position: absolute; top: 12px; right: 12px;">
+                <button type="submit" class="btn-delete-form" title="Eliminar Skill">✕</button>
+            </form>
+        </div>
+        {% else %}
+        <div style="font-size: 13px; color: #595959;">No hay Skills registradas.</div>
+        {% endfor %}
+    </div>
+
+    <!-- Formulario para agregar una nueva Skill -->
+    <form method="POST" action="{{ url_for('skills.create_skill') }}" enctype="multipart/form-data" style="margin-top: 10px; background: #D9D9D9; padding: 12px; border-radius: 14px;">
+        <div style="font-size: 13px; font-weight: bold; color: #002D5A; margin-bottom: 8px;">+ Crear Nueva Skill</div>
+        <div class="field-group" style="margin-bottom: 6px;">
+            <input type="text" name="name" class="input-pill" placeholder="Nombre de la Skill" required style="font-size: 13px; padding: 8px 12px;">
+        </div>
+        <div class="field-group" style="margin-bottom: 6px;">
+            <input type="text" name="description" class="input-pill" placeholder="Descripción de la función" style="font-size: 13px; padding: 8px 12px;">
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+            <span style="font-size: 11px; color: #595959;">Imagen/Diagrama:</span>
+            <input type="file" name="image" accept="image/*" style="font-size: 11px; flex: 1;">
+            <button type="submit" class="btn-primary" style="padding: 6px 16px; font-size: 12px;">Guardar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

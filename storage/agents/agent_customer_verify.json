@@ -1,0 +1,15 @@
+{
+  "id": "agent_customer_verify",
+  "code": "AG-002",
+  "name": "Agente Validador Cliente",
+  "role": "Verificación de Domicilio y Datos",
+  "avatar_url": null,
+  "skills": [
+    "skill_address_norm",
+    "skill_cuit_verify"
+  ],
+  "rules": [
+    "rule_address_change"
+  ],
+  "created_at": "2026-08-14"
+}

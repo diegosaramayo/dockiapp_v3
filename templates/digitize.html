@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}DockiApp - Digitalizar nuevo formulario{% endblock %}
+
+{% block header_title %}DockiApp{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('digitize.digitize_form') }}" enctype="multipart/form-data" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+    <div class="content-section" style="align-items: center; text-align: center;">
+
+        {% if error %}
+        <div style="background-color: #ffebee; border: 1px solid #E53935; color: #b71c1c; padding: 10px; border-radius: 10px; font-size: 12px; margin-bottom: 10px; width: 100%;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Botón para seleccionar archivo -->
+        <button type="button" class="btn-primary" id="selectFileBtn" style="width: 90%; margin-top: 10px; padding: 14px 20px;">
+            📁 Seleccionar archivo (XLSX / CSV / DOCX / PDF)
+        </button>
+        <input type="file" name="form_file" id="formFileInput" accept=".xlsx,.xls,.csv,.docx,.doc,.pdf" style="display: none;">
+
+        <div id="fileNameDisplay" style="font-size: 13px; font-weight: bold; color: #002D5A; margin-top: 8px; word-break: break-all;">
+            Ningún archivo seleccionado
+        </div>
+
+        <!-- Nombre del nuevo formulario (Opcional, autocompletado con el nombre del archivo) -->
+        <div class="field-group" style="width: 100%; margin-top: 14px;">
+            <label class="field-label">Nombre del <em>Nuevo Formulario:</em></label>
+            <input type="text" name="form_name" id="formNameInput" class="input-pill" placeholder="Opcional (se usará el nombre del archivo)">
+        </div>
+
+        <!-- Versión del nuevo formulario -->
+        <div class="field-group" style="width: 100%;">
+            <label class="field-label">Versión del <em>Nuevo Formulario:</em></label>
+            <input type="text" name="form_version" class="input-pill" placeholder="01.0001 (opcional)" value="01.0001">
+        </div>
+
+        <div style="font-size: 14px; font-weight: bold; font-style: italic; color: #002D5A; margin-top: 10px;">
+            ¿Digitalizar?
+        </div>
+    </div>
+
+    <!-- Botones de Acción: Sí / Volver -->
+    <div class="action-buttons-row">
+        <button type="submit" class="btn-primary" style="padding: 10px 38px;">
+            Sí
+        </button>
+        <a href="{{ url_for('main.index') }}" class="btn-secondary" style="padding: 10px 38px;">
+            Volver
+        </a>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const fileInput = document.getElementById("formFileInput");
+    const nameDisplay = document.getElementById("fileNameDisplay");
+    const nameInput = document.getElementById("formNameInput");
+
+    if (fileInput && nameDisplay) {
+        fileInput.addEventListener("change", function() {
+            if (fileInput.files && fileInput.files[0]) {
+                const name = fileInput.files[0].name;
+                nameDisplay.textContent = "📄 " + name;
+                if (nameInput && (!nameInput.value || nameInput.value.trim() === "")) {
+                    const cleanName = name.substring(0, name.lastIndexOf('.')) || name;
+                    nameInput.value = cleanName;
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

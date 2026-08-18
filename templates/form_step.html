@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}{{ form.name }} - Paso {{ step_num }}{% endblock %}
+
+{% block header_title %}{{ form.short_name or form.name }}{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('form.render_step', form_id=form.id, step_num=step_num) }}" id="stepForm" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+
+    <div class="content-section">
+
+        <!-- Banner de Alertas de Agentes / Reglas Activas -->
+        {% if active_alerts %}
+            {% for alert in active_alerts %}
+            <div class="agent-alert-box">
+                <span style="font-size: 18px;">🤖</span>
+                <div class="agent-alert-text">
+                    <strong>{{ alert.rule_name }}:</strong> {{ alert.message }}
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% for field in step.fields %}
+            {% if field.type == 'input' %}
+                <div class="field-group">
+                    <label class="field-label"><span>{{ field.label }}</span></label>
+                    <input type="text"
+                           name="{{ field.id }}"
+                           class="input-pill"
+                           placeholder="{{ field.placeholder or 'XXXX' }}"
+                           value="{{ responses.get(field.id, field.value) }}">
+                </div>
+
+            {% elif field.type == 'complex_skill' %}
+                <div class="field-group">
+                    <label class="field-label"><span>{{ field.label }}:</span></label>
+                    {% if field.content_text %}
+                        <div class="terms-box" style="margin-bottom: 10px;">
+                            {{ field.content_text }}
+                        </div>
+                    {% endif %}
+
+                    {% if field.options %}
+                        <select name="{{ field.id }}" class="input-pill" style="text-align-last: center; font-size: 15px; cursor: pointer;">
+                            <option value="">-- Seleccionar Opción --</option>
+                            {% for opt in field.options %}
+                                <option value="{{ opt }}" {% if responses.get(field.id) == opt %}selected{% endif %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="text" name="{{ field.id }}" class="input-pill" value="{{ responses.get(field.id, '') }}">
+                    {% endif %}
+                </div>
+
+            {% elif field.type == 'date' %}
+                <div class="field-group" style="position: relative;">
+                    <label class="field-label"><span>{{ field.label }}</span></label>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="text"
+                               name="{{ field.id }}"
+                               class="input-pill input-date-picker"
+                               placeholder="DD/MM/AAAA"
+                               value="{{ responses.get(field.id, field.value or '') }}"
+                               readonly
+                               style="cursor: pointer; text-align: center;">
+                        <span style="position: absolute; right: 16px; pointer-events: none; font-size: 16px;">📅</span>
+
+                        <!-- Ventana Emergente Selector de Fecha Oscuro (DatePicker) -->
+                        <div class="datepicker-popup">
+                            <div class="datepicker-header">
+                                <button type="button" class="datepicker-nav-btn prev-month-btn">&lt;</button>
+                                <span class="datepicker-month-year">agosto 2026</span>
+                                <button type="button" class="datepicker-nav-btn next-month-btn">&gt;</button>
+                            </div>
+                            <div class="datepicker-days-header">
+                                <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                            </div>
+                            <div class="datepicker-grid">
+                                <!-- Días del calendario renderizados dinámicamente por JavaScript -->
+                            </div>
+                            <div class="datepicker-footer">
+                                <button type="button" class="btn-datepicker-today">Hoy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            {% elif field.type == 'select' %}
+                <div class="field-group">
+                    <label class="field-label"><span>{{ field.label }}</span></label>
+                    <select name="{{ field.id }}" class="input-pill" style="text-align-last: center; font-size: 15px; cursor: pointer;">
+                        <option value="">-- Seleccionar Opción --</option>
+                        {% for opt in field.options %}
+                            <option value="{{ opt }}" {% if responses.get(field.id) == opt %}selected{% endif %}>{{ opt }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            {% elif field.type == 'address_verify' %}
+                <div class="field-group">
+                    <label class="field-label"><span>{{ field.label }}</span></label>
+                    <div class="terms-box">
+                        {{ field.address }}
+                    </div>
+
+                    <div class="check-verify-container">
+                        <span class="check-prompt">{{ field.prompt or '¿Es correcto?' }}</span>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="icon-check-btn btn-green-check {% if responses.get(field.id ~ '_correct') == 'yes' %}active{% endif %}">✓</button>
+                            <button type="button" class="icon-check-btn btn-red-cross {% if responses.get(field.id ~ '_correct') == 'no' %}active{% endif %}">✕</button>
+                        </div>
+                        <input type="hidden" name="{{ field.id }}_correct" class="hidden-check-input" value="{{ responses.get(field.id ~ '_correct', '') }}">
+                    </div>
+
+                    <div class="sub-input-container" style="display: {% if responses.get(field.id ~ '_correct') == 'no' %}block{% else %}none{% endif %}; margin-top: 8px;">
+                        <input type="text"
+                               name="{{ field.id }}_new_address"
+                               class="input-pill"
+                               placeholder="{{ field.sub_label or 'Nueva Dirección...' }}"
+                               value="{{ responses.get(field.id ~ '_new_address', '') }}">
+                    </div>
+                </div>
+
+            {% elif field.type == 'terms_header' %}
+                <div style="font-size: 15px; font-weight: bold; color: #002D5A; margin-top: 6px;">
+                    {{ field.text }}
+                </div>
+
+            {% elif field.type == 'terms_box' %}
+                <div class="terms-box">
+                    {{ field.text }}
+                </div>
+
+            {% elif field.type == 'check_options' %}
+                <div class="check-verify-container" style="background-color: #D9D9D9; border-radius: 14px; padding: 12px;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button type="button" class="icon-check-btn btn-green-check {% if responses.get(field.id ~ '_checked') == 'yes' %}active{% endif %}">✓</button>
+                        <button type="button" class="icon-check-btn btn-red-cross {% if responses.get(field.id ~ '_checked') == 'no' %}active{% endif %}">✕</button>
+                    </div>
+                    <span style="font-size: 15px; color: #595959; margin-left: 8px; flex: 1;">{{ field.label }}</span>
+                    <input type="hidden" name="{{ field.id }}_checked" class="hidden-check-input" value="{{ responses.get(field.id ~ '_checked', '') }}">
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <div style="font-size: 15px; font-weight: bold; font-style: italic; color: #002D5A; text-align: center; margin-top: 10px;">
+            ¿Continuar?
+        </div>
+    </div>
+
+    <!-- Botones de Acción y Paginado -->
+    <div>
+        <div class="action-buttons-row">
+            <button type="submit" name="action" value="next" class="btn-primary" style="padding: 10px 38px;">
+                Sí
+            </button>
+            <button type="button" id="btnVolverModal" class="btn-secondary" style="padding: 10px 38px;">
+                Volver
+            </button>
+        </div>
+
+        <div class="device-footer">
+            <div class="pagination-controls">
+                {% if step_num > 1 %}
+                    <a href="{{ url_for('form.render_step', form_id=form.id, step_num=step_num-1) }}">&#9664;&#9664;</a>
+                {% else %}
+                    <span style="color: #a0b2c6;">&#9664;&#9664;</span>
+                {% endif %}
+
+                <span>1 - <strong>{{ step_num }}</strong> - {{ total_pages }}</span>
+
+                {% if step_num < total_pages %}
+                    <a href="{{ url_for('form.render_step', form_id=form.id, step_num=step_num+1) }}">&#9654;&#9654;</a>
+                {% else %}
+                    <span style="color: #a0b2c6;">&#9654;&#9654;</span>
+                {% endif %}
+            </div>
+
+            <div class="version-label">
+                {{ form.version }}
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Modal emergente de advertencia para Campos Incompletos -->
+<div class="modal-backdrop" id="incompleteFieldsModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            ATENCIÓN: Campos Incompletos.
+        </div>
+        <div class="modal-body">
+            <div class="modal-text">
+                Deberá completar todos los datos para proseguir.
+            </div>
+            <div class="modal-buttons">
+                <button type="button" id="btnIncompleteOk" class="btn-secondary" style="padding: 10px 38px;">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal emergente de confirmación al presionar "Volver" -->
+<div class="modal-backdrop" id="cancelModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            ATENCIÓN
+        </div>
+        <div class="modal-body">
+            <div class="modal-text">
+                ¿Cancelar y volver a la pantalla inicial?
+            </div>
+            <div class="modal-buttons">
+                <a href="{{ url_for('main.index') }}" class="btn-primary" style="padding: 10px 30px;">
+                    Sí
+                </a>
+                <button type="button" id="btnModalNo" class="btn-secondary" style="padding: 10px 30px;">
+                    No
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const btnVolver = document.getElementById("btnVolverModal");
+    const cancelModal = document.getElementById("cancelModal");
+    const btnModalNo = document.getElementById("btnModalNo");
+
+    if (btnVolver && cancelModal) {
+        btnVolver.addEventListener("click", function(e) {
+            e.preventDefault();
+            cancelModal.classList.add("show");
+        });
+    }
+
+    if (btnModalNo && cancelModal) {
+        btnModalNo.addEventListener("click", function(e) {
+            e.preventDefault();
+            cancelModal.classList.remove("show");
+        });
+    }
+});
+</script>
+{% endblock %}

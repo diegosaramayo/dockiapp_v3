@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}DockiApp - Módulo de Rules{% endblock %}
+
+{% block header_title %}DockiApp{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="form-list-title">Módulo de <em>Rules (Reglas de Negocio):</em></div>
+
+    <!-- Carga masiva de Matriz de Reglas desde XLSX / Excel o CSV -->
+    <form method="POST" action="{{ url_for('rules.upload_excel') }}" enctype="multipart/form-data" style="background: #e3f7ff; padding: 10px; border-radius: 14px; border: 1px dashed #002D5A; margin-bottom: 8px;">
+        <div style="font-size: 13px; font-weight: bold; color: #002D5A; margin-bottom: 6px;">Importar Reglas desde XLSX / CSV:</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="file" name="excel_file" accept=".xlsx,.xls,.csv" required style="font-size: 11px; flex: 1;">
+            <button type="submit" class="btn-primary" style="padding: 6px 14px; font-size: 12px;">Subir Archivo</button>
+        </div>
+    </form>
+
+    <!-- Barra de Selección Masiva y Borrado -->
+    <form method="POST" action="{{ url_for('rules.delete_rules_bulk') }}" onsubmit="return confirm('¿Desea eliminar masivamente las reglas seleccionadas?');">
+        {% if rules %}
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #f0f4f8; padding: 6px 10px; border-radius: 10px; margin-bottom: 8px;">
+            <label style="font-size: 12px; font-weight: bold; color: #002D5A; cursor: pointer;">
+                <input type="checkbox" id="selectAllRulesCb"> Seleccionar Todas
+            </label>
+            <button type="submit" class="btn-secondary" style="padding: 4px 14px; font-size: 12px; background-color: #E53935;">
+                Eliminar Seleccionadas ✕
+            </button>
+        </div>
+        {% endif %}
+
+        <!-- Lista de Reglas -->
+        <div style="max-height: 250px; overflow-y: auto;">
+            {% for rule in rules %}
+            <div class="item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+                <div style="padding-top: 4px;">
+                    <input type="checkbox" name="rule_ids" value="{{ rule.id }}" class="rule-item-cb" style="transform: scale(1.2); cursor: pointer;">
+                </div>
+
+                <div style="flex: 1;">
+                    <div class="item-card-header">
+                        <div class="item-card-title">{{ rule.name }}</div>
+                        <span class="item-card-code">{{ rule.code }}</span>
+                    </div>
+
+                    {% if rule.type == 'transform_to_select' or rule.action == 'transform_to_select' %}
+                        <div class="item-card-desc" style="color: #2e7d32; font-weight: bold;">
+                            Transformación: Selector desplegable ({{ rule.options|length if rule.options else 0 }} opciones)
+                        </div>
+                        <div style="font-size: 11px; color: #595959;">Palabras Clave Blanco: {{ rule.target_keywords|join(', ') }}</div>
+                    {% elif rule.type == 'rename_label' or rule.action == 'rename_label' %}
+                        <div class="item-card-desc" style="color: #002D5A; font-weight: bold;">
+                            Transformación: Renombrar campo a "{{ rule.new_label }}"
+                        </div>
+                        <div style="font-size: 11px; color: #595959;">Palabras Clave Blanco: {{ rule.target_keywords|join(', ') }}</div>
+                    {% else %}
+                        <div class="item-card-desc">Campo Evaluado: <strong>{{ rule.target_field }}</strong></div>
+                        <div class="item-card-desc">Condición: {{ rule.condition }} == "{{ rule.trigger_value }}"</div>
+                        <div style="font-size: 12px; color: #E53935; font-weight: bold;">Mensaje: {{ rule.message }}</div>
+                    {% endif %}
+
+                    {% if rule.image_url %}
+                        <img src="{{ rule.image_url }}" class="item-thumbnail" alt="Diagrama Regla" style="margin-top: 4px;">
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div style="font-size: 13px; color: #595959; text-align: center; padding: 10px;">No hay Reglas registradas.</div>
+            {% endfor %}
+        </div>
+    </form>
+
+    <!-- Formulario para agregar una nueva Regla manual -->
+    <form method="POST" action="{{ url_for('rules.create_rule') }}" enctype="multipart/form-data" style="margin-top: 10px; background: #D9D9D9; padding: 12px; border-radius: 14px;">
+        <div style="font-size: 13px; font-weight: bold; color: #002D5A; margin-bottom: 8px;">+ Crear Nueva Regla de Negocio</div>
+        <div class="field-group" style="margin-bottom: 6px;">
+            <input type="text" name="name" class="input-pill" placeholder="Nombre de la Regla" required style="font-size: 13px; padding: 8px 12px;">
+        </div>
+        <div class="field-group" style="margin-bottom: 6px;">
+            <input type="text" name="target_field" class="input-pill" placeholder="Campo Target (ej. us_person_check_checked)" required style="font-size: 13px; padding: 8px 12px;">
+        </div>
+        <div class="field-group" style="margin-bottom: 6px;">
+            <input type="text" name="trigger_value" class="input-pill" placeholder="Valor Disparador (ej. yes)" required style="font-size: 13px; padding: 8px 12px;">
+        </div>
+        <div class="field-group" style="margin-bottom: 6px;">
+            <input type="text" name="message" class="input-pill" placeholder="Mensaje de Alerta al usuario" required style="font-size: 13px; padding: 8px 12px;">
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+            <span style="font-size: 11px; color: #595959;">Diagrama Regla:</span>
+            <input type="file" name="image" accept="image/*" style="font-size: 11px; flex: 1;">
+            <button type="submit" class="btn-primary" style="padding: 6px 16px; font-size: 12px;">Guardar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const selectAllCb = document.getElementById("selectAllRulesCb");
+    const itemCbs = document.querySelectorAll(".rule-item-cb");
+
+    if (selectAllCb) {
+        selectAllCb.addEventListener("change", function() {
+            itemCbs.forEach(cb => {
+                cb.checked = selectAllCb.checked;
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

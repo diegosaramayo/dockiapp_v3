@@ -1,0 +1,14 @@
+{
+  "admin": {
+    "username": "admin",
+    "name": "Administrador General",
+    "password_hash": "scrypt:32768:8:1$V8gzQHviNy8i9gLv$39b5a865eae01ca04f514c8204d7565b680eb31e975cb8b1aaf382be157b982fe5a7d1d155475e09cc53af534303d5001ecb214c4128693ab76816f8bd21472d",
+    "role": "admin"
+  },
+  "operador": {
+    "username": "operador",
+    "name": "Operador de Formulario",
+    "password_hash": "scrypt:32768:8:1$AyQNLwhSmpFTzoes$555467b08d9f148c0774011ec1bd57a0cf937935f54afddde158aff273994b6712a916aaed83d95846267f20f162ef18ab9d1a1eee149c9bbe23a3aa1cea7eee",
+    "role": "operator"
+  }
+}

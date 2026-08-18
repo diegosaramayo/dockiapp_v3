@@ -1,0 +1,10 @@
+{
+  "code": "AG-NEW",
+  "name": "Gema 4",
+  "role": "Optimizar",
+  "ollama_model": "gemma4:26b",
+  "avatar_url": null,
+  "skills": [],
+  "rules": [],
+  "id": "agent_bf031a62"
+}

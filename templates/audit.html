@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}DockiApp - Registro de Auditoría{% endblock %}
+
+{% block header_title %}Auditoría{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+    <div class="content-section">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="section-title" style="margin-bottom: 0;">
+                📜 Registro Inalterable de Auditoría:
+            </div>
+            <a href="{{ url_for('main.index') }}" class="form-item-bullet" style="font-size: 13px; text-decoration: none;">✕</a>
+        </div>
+
+        <!-- Buscador de Auditoría -->
+        <form method="GET" action="{{ url_for('audit.view_audit_log') }}" style="display: flex; gap: 8px; margin-top: 6px;">
+            <input type="text" name="q" class="input-pill" placeholder="Buscar por usuario, acción o IP..." value="{{ search_query }}" style="font-size: 12px; padding: 8px 14px; text-align: left;">
+            <button type="submit" class="btn-primary" style="padding: 8px 16px; font-size: 12px;">🔍</button>
+        </form>
+
+        <div style="max-height: 400px; overflow-y: auto; margin-top: 8px; padding-right: 4px;">
+            {% for ev in events %}
+            <div style="background-color: #f7fcfe; border: 1px solid #CAEEFB; border-radius: 12px; padding: 10px; margin-bottom: 8px; font-size: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-weight: bold; color: #002D5A; background-color: #CAEEFB; padding: 2px 8px; border-radius: 8px; font-size: 11px;">
+                        {{ ev.action }}
+                    </span>
+                    <span style="color: #888888; font-size: 10px;">{{ ev.timestamp }}</span>
+                </div>
+                <div style="color: #595959; font-weight: 500; margin-bottom: 2px;">
+                    {{ ev.details }}
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888888; margin-top: 4px; border-top: 1px dashed #d0e8f5; padding-top: 4px;">
+                    <span>👤 Usuario: <strong>{{ ev.username }}</strong> ({{ ev.role }})</span>
+                    <span>🌐 IP: <strong>{{ ev.ip }}</strong></span>
+                </div>
+            </div>
+            {% else %}
+            <div style="font-size: 13px; color: #888888; text-align: center; padding: 20px;">
+                No se encontraron registros de auditoría.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <div class="device-footer">
+            <div class="pagination-controls">
+                <span style="color: #a0b2c6;">&#9664;&#9664;</span>
+                <span>Total Registros: <strong>{{ events|length }}</strong></span>
+                <span style="color: #a0b2c6;">&#9654;&#9654;</span>
+            </div>
+            <div class="version-label">
+                Audit Trail v2.0
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

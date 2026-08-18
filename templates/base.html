@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DockiApp{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="device-shell">
+        <!-- Cabecera del dispositivo -->
+        <header class="device-header">
+            <a href="{{ url_for('main.index') }}" class="app-name">
+                {% block header_title %}DockiApp{% endblock %}
+            </a>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+                {% if session.user %}
+                <div style="font-size: 10px; text-align: right; color: #CAEEFB; line-height: 1.2;">
+                    <strong>{{ session.user.name }}</strong><br>
+                    <span style="background-color: {% if session.user.role == 'admin' %}#E53935{% else %}#0078d4{% endif %}; color: #ffffff; padding: 1px 6px; border-radius: 8px; font-size: 9px; font-weight: bold;">
+                        {{ session.user.role|upper }}
+                    </span>
+                </div>
+                {% endif %}
+
+                <button class="company-logo-btn" id="companyLogoBtn" title="Haga clic para cambiar logo de empresa">
+                    {% if config and config.company_logo_url %}
+                        <img src="{{ config.company_logo_url }}" class="company-logo-img" id="companyLogoImg" alt="Logo">
+                    {% endif %}
+                    <span>Nombre / Ícono<br><em>Empresa</em></span>
+                </button>
+                <input type="file" id="companyLogoInput" accept="image/*" style="display: none;">
+
+                {% if session.user %}
+                <!-- Ícono de Engranaje de Configuración (⚙️) -->
+                <button class="settings-gear-btn" id="settingsGearBtn" title="Menú de navegación y configuración">⚙️</button>
+                {% endif %}
+            </div>
+        </header>
+
+        {% if session.user %}
+        <!-- Menú Desplegable Flotante de Configuración (⚙️) -->
+        <div class="settings-dropdown" id="settingsDropdownMenu">
+            <a href="{{ url_for('main.index') }}" class="dropdown-item">📄 Formularios</a>
+            
+            {% if session.user.role == 'admin' %}
+            <a href="{{ url_for('digitize.digitize_form') }}" class="dropdown-item">📁 Digitalizar Nuevo</a>
+            <a href="{{ url_for('skills.list_skills') }}" class="dropdown-item">💡 Skills</a>
+            <a href="{{ url_for('rules.list_rules') }}" class="dropdown-item">📐 Rules</a>
+            <a href="{{ url_for('agents.list_agents') }}" class="dropdown-item">🤖 Agents</a>
+            <a href="{{ url_for('audit.view_audit_log') }}" class="dropdown-item">📜 Auditoría</a>
+            {% endif %}
+
+            <a href="{{ url_for('auth.logout') }}" class="dropdown-item" style="color: #E53935;">🔒 Salir (Logout)</a>
+        </div>
+        {% endif %}
+
+        <!-- Cuerpo del Formulario -->
+        <main class="device-body">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/company_logo.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

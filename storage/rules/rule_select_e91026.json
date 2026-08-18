@@ -1,0 +1,16 @@
+{
+  "id": "rule_select_e91026",
+  "code": "RL-SEL-50CF",
+  "name": "Regla Selector desde Archivo",
+  "type": "transform_to_select",
+  "target_keywords": [
+    "país",
+    "pais"
+  ],
+  "options": [
+    "Al digitalizarlo, pasar el t�tulo a:",
+    "Documento de Identidad"
+  ],
+  "action": "transform_to_select",
+  "message": "Campo transformado a selector desplegable con 2 opciones."
+}

@@ -1,0 +1,15 @@
+{
+  "id": "agent_fatca_auditor",
+  "code": "AG-001",
+  "name": "Agente Auditor FATCA",
+  "role": "Supervisión de Cumplimiento Fiscal",
+  "avatar_url": null,
+  "skills": [
+    "skill_fatca_check",
+    "skill_cuit_verify"
+  ],
+  "rules": [
+    "rule_fatca_us_person"
+  ],
+  "created_at": "2026-08-14"
+}

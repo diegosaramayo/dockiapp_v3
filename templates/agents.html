@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}DockiApp - Módulo de Agents & Ollama LLM{% endblock %}
+
+{% block header_title %}DockiApp{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="form-list-title">Módulo de <em>Agents (Agentes Asistentes & Ollama):</em></div>
+
+    <!-- Indicador de Estado de Ollama Local -->
+    <div style="background: {% if ollama_running %}#e3f7ff{% else %}#fff3cd{% endif %}; border: 1px solid {% if ollama_running %}#CAEEFB{% else %}#ffebaba{% endif %}; padding: 6px 12px; border-radius: 12px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="font-size: 11px; font-weight: bold; color: #002D5A;">
+            🦙 <strong>Ollama Local:</strong> 
+            {% if ollama_running %}
+                <span style="color: #2e7d32;">Activo ({{ ollama_models|length }} modelos locales detectados)</span>
+            {% else %}
+                <span style="color: #d84315;">No detectado en 127.0.0.1:11434</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Carga masiva de Agentes desde XLSX / Excel o CSV -->
+    <form method="POST" action="{{ url_for('agents.upload_excel') }}" enctype="multipart/form-data" style="background: #e3f7ff; padding: 10px; border-radius: 14px; border: 1px dashed #002D5A; margin-bottom: 8px;">
+        <div style="font-size: 13px; font-weight: bold; color: #002D5A; margin-bottom: 6px;">Importar Agentes desde XLSX / CSV:</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="file" name="excel_file" accept=".xlsx,.xls,.csv" required style="font-size: 11px; flex: 1;">
+            <button type="submit" class="btn-primary" style="padding: 6px 14px; font-size: 12px;">Subir Archivo</button>
+        </div>
+    </form>
+
+    <!-- Lista de Agentes -->
+    <div style="max-height: 250px; overflow-y: auto;">
+        {% for agent in agents %}
+        <div class="item-card">
+            <div style="display: flex; gap: 12px; align-items: center;">
+                {% if agent.avatar_url %}
+                    <img src="{{ agent.avatar_url }}" class="avatar-circle" alt="Avatar Agente">
+                {% else %}
+                    <div class="avatar-circle" style="background: #002D5A; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">AG</div>
+                {% endif %}
+
+                <div style="flex: 1;">
+                    <div class="item-card-header">
+                        <div class="item-card-title">{{ agent.name }}</div>
+                        <span class="item-card-code">{{ agent.code }}</span>
+                    </div>
+                    <div class="item-card-desc">Rol: <strong>{{ agent.role }}</strong></div>
+
+                    {% if agent.ollama_model %}
+                    <div style="margin-top: 4px;">
+                        <span style="background-color: #002D5A; color: #FFFFFF; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold;">
+                            🦙 Modelo Ollama: {{ agent.ollama_model }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Habilidades asociadas -->
+            {% if agent.skills_details %}
+            <div style="font-size: 11px; color: #002D5A; margin-top: 6px;">
+                <strong>Skills:</strong>
+                {% for s in agent.skills_details %}
+                    <span style="background: #CAEEFB; padding: 2px 6px; border-radius: 8px; margin-right: 4px;">{{ s.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Reglas asociadas -->
+            {% if agent.rules_details %}
+            <div style="font-size: 11px; color: #002D5A; margin-top: 4px;">
+                <strong>Rules:</strong>
+                {% for r in agent.rules_details %}
+                    <span style="background: #D9D9D9; padding: 2px 6px; border-radius: 8px; margin-right: 4px;">{{ r.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('agents.delete_agent', agent_id=agent.id) }}" style="position: absolute; top: 12px; right: 12px;">
+                <button type="submit" class="btn-delete-form" title="Eliminar Agente">✕</button>
+            </form>
+        </div>
+        {% else %}
+        <div style="font-size: 13px; color: #595959;">No hay Agentes configurados.</div>
+        {% endfor %}
+    </div>
+
+    <!-- Formulario para agregar un nuevo Agente con selección de Modelo Ollama -->
+    <form method="POST" action="{{ url_for('agents.create_agent') }}" enctype="multipart/form-data" style="margin-top: 10px; background: #D9D9D9; padding: 12px; border-radius: 14px;">
+        <div style="font-size: 13px; font-weight: bold; color: #002D5A; margin-bottom: 8px;">+ Crear Nuevo Agente</div>
+        
+        <div class="field-group" style="margin-bottom: 6px;">
+            <input type="text" name="name" class="input-pill" placeholder="Nombre del Agente (ej. Agente Llama3)" required style="font-size: 13px; padding: 8px 12px;">
+        </div>
+
+        <div class="field-group" style="margin-bottom: 6px;">
+            <input type="text" name="role" class="input-pill" placeholder="Rol / Función del Agente" style="font-size: 13px; padding: 8px 12px;">
+        </div>
+
+        <div style="font-size: 11px; font-weight: bold; color: #002D5A; margin-top: 4px;">🦙 Seleccionar Modelo Local de Ollama:</div>
+        <div class="field-group" style="margin-bottom: 6px;">
+            {% if ollama_models %}
+                <select name="ollama_model" class="input-pill" style="font-size: 13px; padding: 8px 12px; text-align-last: center;">
+                    <option value="">-- Sin modelo LLM (Solo reglas locales) --</option>
+                    {% for m in ollama_models %}
+                        <option value="{{ m }}">{{ m }} (Ollama Local)</option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <input type="text" name="ollama_model" class="input-pill" placeholder="Nombre del modelo (ej. llama3:latest, mistral, gemma)" style="font-size: 13px; padding: 8px 12px;">
+            {% endif %}
+        </div>
+
+        <div style="font-size: 11px; font-weight: bold; color: #002D5A; margin-top: 6px;">Asignar Skills:</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 50px; overflow-y: auto; margin-bottom: 6px;">
+            {% for s in skills %}
+            <label style="font-size: 11px; color: #595959;">
+                <input type="checkbox" name="skills" value="{{ s.id }}"> {{ s.name }}
+            </label>
+            {% endfor %}
+        </div>
+
+        <div style="font-size: 11px; font-weight: bold; color: #002D5A;">Asignar Rules:</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 50px; overflow-y: auto; margin-bottom: 6px;">
+            {% for r in rules %}
+            <label style="font-size: 11px; color: #595959;">
+                <input type="checkbox" name="rules" value="{{ r.id }}"> {{ r.name }}
+            </label>
+            {% endfor %}
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+            <span style="font-size: 11px; color: #595959;">Avatar Agente:</span>
+            <input type="file" name="avatar" accept="image/*" style="font-size: 11px; flex: 1;">
+            <button type="submit" class="btn-primary" style="padding: 6px 16px; font-size: 12px;">Guardar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

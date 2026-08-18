@@ -1,0 +1,9 @@
+{
+  "id": "skill_fatca_check",
+  "code": "SK-003",
+  "name": "Verificación Ley FATCA",
+  "description": "Analiza las declaraciones juradas para clasificar la condición U.S. Person.",
+  "category": "Cumplimiento Legal",
+  "image_url": null,
+  "created_at": "2026-08-14"
+}

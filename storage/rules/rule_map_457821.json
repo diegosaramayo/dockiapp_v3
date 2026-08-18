@@ -1,0 +1,14 @@
+{
+  "id": "rule_map_457821",
+  "code": "RL-MAP-CCC3",
+  "name": "Regla Mapeo Título: Fecha de Nacimiento",
+  "type": "rename_label",
+  "target_keywords": [
+    "Fecha de Nacimiento …../…../……",
+    "Fecha de Nacimiento (dd/mm/aaaa):",
+    "Fecha de Nacimiento del Titular:"
+  ],
+  "new_label": "Fecha de Nacimiento",
+  "action": "rename_label",
+  "message": "Al digitalizar, título transformado a 'Fecha de Nacimiento'."
+}

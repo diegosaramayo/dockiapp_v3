@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Prueba Inicial - {{ draft.form_name if draft else 'Digitalización' }}{% endblock %}
+
+{% block header_title %}{{ draft.form_name if draft else 'Digitalización' }}{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('digitize.digitize_review') }}" id="reviewForm" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+
+    <div class="content-section">
+        {% if error %}
+            <div style="background-color: #ffebee; border: 1px solid #E53935; color: #b71c1c; padding: 10px; border-radius: 10px; font-size: 13px; text-align: center;">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <div style="font-size: 13px; font-weight: bold; color: #002D5A; text-align: center; margin-bottom: 6px;">
+            Prueba Inicial de Campos Digitalizados:
+        </div>
+
+        <div style="max-height: 360px; overflow-y: auto; padding-right: 4px;">
+            {% if draft and draft.fields %}
+                {% for field in draft.fields %}
+                <div class="field-review-item">
+                    <div class="field-review-info">
+                        <label class="field-label" style="font-size: 14px;">{{ field.label or field.text or 'Campo' }}</label>
+                        
+                        {% if field.type == 'input' %}
+                            <input type="text" class="input-pill" value="{{ field.placeholder or 'XXXX' }}" readonly style="font-size: 13px; padding: 6px 12px; margin-top: 4px;">
+                        {% elif field.type == 'date' %}
+                            <input type="text" class="input-pill" value="DD/MM/AAAA 📅" readonly style="font-size: 13px; padding: 6px 12px; margin-top: 4px; text-align: center;">
+                        {% elif field.type == 'complex_skill' %}
+                            {% if field.content_text %}
+                                <div class="terms-box" style="font-size: 12px; padding: 6px; margin-top: 4px;">{{ (field.content_text or '')[:80] }}...</div>
+                            {% endif %}
+                            <div class="input-pill" style="font-size: 13px; padding: 6px 12px; margin-top: 4px; text-align: center;">
+                                -- Selector: 
+                                {% if field.options and field.options is sequence and field.options is not string %}
+                                    {{ field.options|join(' / ') }}
+                                {% else %}
+                                    Sí / No
+                                {% endif %}
+                                --
+                            </div>
+                        {% elif field.type == 'terms_box' %}
+                            <div class="terms-box" style="font-size: 13px; padding: 8px; margin-top: 4px;">{{ (field.text or '')[:80] }}...</div>
+                        {% else %}
+                            <div class="input-pill" style="font-size: 13px; padding: 6px 12px; margin-top: 4px;">{{ field.label or field.text or 'Campo' }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Botones de Reordenamiento (▲ / ▼) y Eliminación [X] -->
+                    <div class="field-review-actions">
+                        {% if not loop.first %}
+                            <a href="{{ url_for('digitize.move_field', field_id=field.id, direction='up') }}" class="btn-move-field" title="Mover hacia arriba">▲</a>
+                        {% endif %}
+                        {% if not loop.last %}
+                            <a href="{{ url_for('digitize.move_field', field_id=field.id, direction='down') }}" class="btn-move-field" title="Mover hacia abajo">▼</a>
+                        {% endif %}
+                        <a href="{{ url_for('digitize.reject_field', field_id=field.id) }}" class="btn-delete-form" title="Rechazar este campo" style="text-decoration: none; margin-top: 2px;">✕</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="font-size: 13px; color: #E53935; text-align: center; padding: 20px;">
+                    No hay campos cargados en la prueba.
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="font-size: 15px; font-weight: bold; font-style: italic; color: #002D5A; text-align: center; margin-top: 6px;">
+            ¿Continuar?
+        </div>
+    </div>
+
+    <!-- Fila de Botones de Acción: Sí / Agregar Campos / Volver -->
+    <div>
+        <div class="action-buttons-row" style="gap: 10px;">
+            <button type="submit" name="action" value="confirm" class="btn-primary" style="padding: 10px 24px;">
+                Sí
+            </button>
+            <button type="button" id="btnOpenAddFieldsModal" class="btn-primary" style="padding: 10px 20px; background-color: #002D5A; color: #FFFFFF;">
+                Agregar Campos
+            </button>
+            <button type="submit" name="action" value="cancel" class="btn-secondary" style="padding: 10px 24px;">
+                Volver
+            </button>
+        </div>
+
+        <div class="device-footer">
+            <div class="pagination-controls">
+                <span style="color: #a0b2c6;">&#9664;&#9664;</span>
+                <span>1 - <strong>1</strong> - 5</span>
+                <a href="#">&#9654;&#9654;</a>
+            </div>
+
+            <div class="version-label">
+                {{ draft.form_version if draft else '01.0001' }} (16/08/2026)
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Modal emergente para Agregar Campos de Otros Formularios -->
+<div class="modal-backdrop" id="addFieldsModal">
+    <div class="modal-card" style="width: 380px;">
+        <div class="modal-header">
+            ATENCIÓN: Agregar Campos
+        </div>
+        <form method="POST" action="{{ url_for('digitize.digitize_review') }}">
+            <input type="hidden" name="action" value="add_fields">
+            <div class="modal-body" style="gap: 14px; text-align: left;">
+                <div class="modal-text" style="font-size: 13px; color: #002D5A; font-weight: bold;">
+                    Seleccione uno o más campos digitalizados previamente para incorporar a este formulario:
+                </div>
+
+                <div style="max-height: 220px; overflow-y: auto; width: 100%; border: 1px solid #CAEEFB; border-radius: 10px; padding: 8px; background-color: #f7fcfe;">
+                    {% if existing_fields %}
+                        {% for exf in existing_fields %}
+                            <label style="display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-bottom: 1px solid #e0f2fe; font-size: 13px; color: #595959; cursor: pointer;">
+                                <input type="checkbox" name="selected_existing_labels" value="{{ exf.label }}" style="width: 16px; height: 16px; cursor: pointer;">
+                                <strong style="color: #002D5A;">{{ exf.label }}</strong>
+                                <span style="font-size: 11px; color: #888888;">({{ exf.type }})</span>
+                            </label>
+                        {% endfor %}
+                    {% else %}
+                        <div style="font-size: 12px; color: #888888; text-align: center; padding: 10px;">
+                            No hay otros campos digitalizados previamente.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-primary" style="padding: 8px 24px;">
+                        Agregar
+                    </button>
+                    <button type="button" id="btnCloseAddFieldsModal" class="btn-secondary" style="padding: 8px 24px;">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const btnOpenModal = document.getElementById("btnOpenAddFieldsModal");
+    const btnCloseModal = document.getElementById("btnCloseAddFieldsModal");
+    const addFieldsModal = document.getElementById("addFieldsModal");
+
+    if (btnOpenModal && addFieldsModal) {
+        btnOpenModal.addEventListener("click", function(e) {
+            e.preventDefault();
+            addFieldsModal.classList.add("show");
+        });
+    }
+
+    if (btnCloseModal && addFieldsModal) {
+        btnCloseModal.addEventListener("click", function(e) {
+            e.preventDefault();
+            addFieldsModal.classList.remove("show");
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{
+  "id": "rule_map_5bff5d",
+  "code": "RL-MAP-2089",
+  "name": "Regla Mapeo Título: Documento de Identidad",
+  "type": "rename_label",
+  "target_keywords": [
+    "Documento de Identidad",
+    "Documento Único del Titular",
+    "DNI",
+    "DU"
+  ],
+  "new_label": "Documento de Identidad",
+  "action": "rename_label",
+  "message": "Al digitalizar, título transformado a 'Documento de Identidad'."
+}

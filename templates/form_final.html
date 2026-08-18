@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ form.name }} - Confirmación Final{% endblock %}
+
+{% block header_title %}{{ form.short_name or form.name }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+
+    <div class="content-section" style="align-items: center; text-align: center; margin-top: 40px;">
+        <div style="font-size: 16px; font-weight: bold; font-style: italic; color: #002D5A; line-height: 1.5; padding: 0 10px;">
+            ¿Es correcta toda la información cargada y acepta la solicitud?
+        </div>
+
+        <form method="POST" action="{{ url_for('form.render_final', form_id=form.id) }}" id="finalForm" style="width: 100%; margin-top: 34px;">
+            <div class="action-buttons-row">
+                <!-- Al presionar Sí, descarga el archivo TXT con el explorador de la PC -->
+                <a href="{{ url_for('form.download_txt', form_id=form.id) }}" class="btn-primary" id="downloadTxtBtn" style="padding: 10px 42px;">
+                    Sí
+                </a>
+                <button type="submit" name="action" value="cancel" class="btn-secondary" style="padding: 10px 42px;">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="device-footer">
+        <div class="pagination-controls">
+            <a href="{{ url_for('form.render_step', form_id=form.id, step_num=step_num-1) }}">&#9664;&#9664;</a>
+            <span>1 - <strong>{{ step_num }}</strong> - {{ total_pages }}</span>
+            <span style="color: #a0b2c6;">&#9654;&#9654;</span>
+        </div>
+
+        <div class="version-label">
+            {{ form.version }}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const downloadBtn = document.getElementById("downloadTxtBtn");
+    if (downloadBtn) {
+        downloadBtn.addEventListener("click", function() {
+            setTimeout(function() {
+                window.location.href = "{{ url_for('main.index') }}";
+            }, 1200);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{
+  "id": "skill_complex_ef869f",
+  "code": "SK-CMP-B1C0",
+  "name": "Skill Transformación: Declaración Jurada Persona Expuesta Políticamente (PEP)",
+  "type": "complex_skill",
+  "target_keywords": [
+    "Declaración Jurada PERSONA EXPUESTA POLÍTICAMENTE (PEP)",
+    "DDJJ PEP",
+    "Declaración PEP"
+  ],
+  "new_title": "Declaración Jurada Persona Expuesta Políticamente (PEP)",
+  "content_text": "Me encuentro incluido y/o alcanzado dentro de la “Nómina de Personas Expuestas Políticamente” aprobada por la Unidad de Información Financiera, que he leído.\n\nAdemás, asumo el compromiso de informar cualquier modificación que se produzca a este respecto, dentro de los treinta (30) días de ocurrida, mediante la presentación de una nueva declaración jurada.",
+  "options": [
+    "Sí",
+    "No"
+  ],
+  "description": "Añade contenido explicativo y selector (2 opciones) al digitalizar.",
+  "category": "Transformación de Campos"
+}
